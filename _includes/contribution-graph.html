@@ -1,0 +1,258 @@
+{% assign posts_pool = site.posts %}
+{% if include.post_lang %}
+  {% assign posts_pool = site.posts | where: 'post_lang', include.post_lang %}
+{% endif %}
+{% unless site.env == 'development' %}
+  {% assign posts_pool = posts_pool | where_exp: 'item', 'item.hidden != true and item.local_only != true' %}
+{% endunless %}
+
+<section id="contribution-graph">
+  <div class="contrib-header">
+    <h2 class="panel-heading mb-0">{{ site.data.locales[include.lang].panel.contribution_graph | default: "블로그 활동" }}</h2>
+    <span class="contrib-total" id="contrib-total"></span>
+  </div>
+
+  <div class="contrib-graph-wrap" id="contrib-wrap">
+    <canvas id="contrib-canvas" class="contrib-canvas"></canvas>
+    <div id="contrib-tooltip" class="contrib-tooltip" role="tooltip"></div>
+  </div>
+
+  <div class="contrib-legend">
+    <span class="legend-label">적음</span>
+    <span class="swatch" style="background:var(--contrib-empty)"></span>
+    <span class="swatch" style="background:var(--contrib-l1)"></span>
+    <span class="swatch" style="background:var(--contrib-l2)"></span>
+    <span class="swatch" style="background:var(--contrib-l3)"></span>
+    <span class="swatch" style="background:var(--contrib-l4)"></span>
+    <span class="legend-label-right">많음</span>
+  </div>
+</section>
+
+<script>
+(function () {
+  const POST_DATES = [
+    {% for post in posts_pool %}"{{ post.date | date: '%Y-%m-%d' }}"{% unless forloop.last %},{% endunless %}{% endfor %}
+  ];
+
+  const DAYS  = 7;
+  const CELL  = 11;
+  const GAP   = 2;
+  const STEP  = CELL + GAP;
+  const PAD_L = 24;  /* day label width */
+  const PAD_T = 18;  /* month label height */
+
+  const DAY_ABBR   = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
+  const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun',
+                      'Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  const countMap = (function () {
+    const m = {};
+    POST_DATES.forEach(d => { m[d] = (m[d] || 0) + 1; });
+    return m;
+  })();
+
+  function toDateStr(d) {
+    return d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getDate()).padStart(2, '0');
+  }
+
+  function cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function getColors() {
+    return {
+      empty : cssVar('--contrib-empty')    || '#ebedf0',
+      l1    : cssVar('--contrib-l1')       || '#9be9a8',
+      l2    : cssVar('--contrib-l2')       || '#40c463',
+      l3    : cssVar('--contrib-l3')       || '#30a14e',
+      l4    : cssVar('--contrib-l4')       || '#216e39',
+      text  : cssVar('--text-muted-color') || '#757575',
+    };
+  }
+
+  function cellColor(count, colors) {
+    if (!count)      return colors.empty;
+    if (count === 1) return colors.l1;
+    if (count === 2) return colors.l2;
+    if (count === 3) return colors.l3;
+    return colors.l4;
+  }
+
+  /* Calculate how many weeks fit the container, minimum 12 */
+  function calcWeeks(containerWidth) {
+    const available = containerWidth - PAD_L;
+    return Math.max(12, Math.floor(available / STEP));
+  }
+
+  /* Build cell positions for a given week count */
+  function buildCells(weeks) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    /* Start from the Sunday of (weeks-1) full weeks ago */
+    const start = new Date(today);
+    start.setDate(today.getDate() - today.getDay()); /* this Sunday */
+    start.setDate(start.getDate() - (weeks - 1) * DAYS);
+
+    const cells = [];
+    for (let w = 0; w < weeks; w++) {
+      for (let d = 0; d < DAYS; d++) {
+        const cur = new Date(start);
+        cur.setDate(start.getDate() + w * DAYS + d);
+        const dateStr = toDateStr(cur);
+        cells.push({
+          date  : dateStr,
+          count : countMap[dateStr] || 0,
+          future: cur > today,
+          x     : PAD_L + w * STEP,
+          y     : PAD_T + d * STEP,
+          month : cur.getMonth(),
+        });
+      }
+    }
+    return cells;
+  }
+
+  let currentCells = [];
+
+  function render(weeks) {
+    const canvas = document.getElementById('contrib-canvas');
+    if (!canvas) return;
+    const ctx    = canvas.getContext('2d');
+    const colors = getColors();
+    const dpr    = window.devicePixelRatio || 1;
+
+    currentCells = buildCells(weeks);
+
+    const W = PAD_L + weeks * STEP;
+    const H = PAD_T + DAYS * STEP;
+
+    canvas.width        = W * dpr;
+    canvas.height       = H * dpr;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, W, H);
+
+    /* Month labels */
+    ctx.font         = '9px system-ui, sans-serif';
+    ctx.fillStyle    = colors.text;
+    ctx.textBaseline = 'top';
+    let prevMonth = -1;
+    for (let w = 0; w < weeks; w++) {
+      const cell = currentCells[w * DAYS];
+      if (cell && cell.month !== prevMonth) {
+        ctx.fillText(MONTH_ABBR[cell.month], PAD_L + w * STEP, 2);
+        prevMonth = cell.month;
+      }
+    }
+
+    /* Day labels */
+    ctx.textBaseline = 'middle';
+    DAY_ABBR.forEach((label, i) => {
+      if (label) ctx.fillText(label, 0, PAD_T + i * STEP + CELL / 2);
+    });
+
+    /* Cells */
+    currentCells.forEach(cell => {
+      if (cell.future) return;
+      ctx.fillStyle = cellColor(cell.count, colors);
+      const { x, y } = cell;
+      const r = 2;
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + CELL - r, y);
+      ctx.quadraticCurveTo(x + CELL, y, x + CELL, y + r);
+      ctx.lineTo(x + CELL, y + CELL - r);
+      ctx.quadraticCurveTo(x + CELL, y + CELL, x + CELL - r, y + CELL);
+      ctx.lineTo(x + r, y + CELL);
+      ctx.quadraticCurveTo(x, y + CELL, x, y + CELL - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+      ctx.fill();
+    });
+
+    const totalEl = document.getElementById('contrib-total');
+    if (totalEl) totalEl.textContent = POST_DATES.length + '개';
+  }
+
+  function setupTooltip() {
+    const canvas  = document.getElementById('contrib-canvas');
+    const tooltip = document.getElementById('contrib-tooltip');
+    if (!canvas || !tooltip) return;
+
+    canvas.addEventListener('mousemove', function (e) {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      const col = Math.floor((mx - PAD_L) / STEP);
+      const row = Math.floor((my - PAD_T) / STEP);
+      const weeks = currentCells.length / DAYS;
+
+      if (col < 0 || col >= weeks || row < 0 || row >= DAYS) {
+        tooltip.style.display = 'none'; return;
+      }
+
+      const cx = PAD_L + col * STEP;
+      const cy = PAD_T + row * STEP;
+      if (mx < cx || mx > cx + CELL || my < cy || my > cy + CELL) {
+        tooltip.style.display = 'none'; return;
+      }
+
+      const cell = currentCells[col * DAYS + row];
+      if (!cell || cell.future) { tooltip.style.display = 'none'; return; }
+
+      tooltip.textContent = cell.count === 0
+        ? cell.date + ' — 포스트 없음'
+        : cell.date + ' — ' + cell.count + '개 포스트';
+
+      tooltip.style.display = 'block';
+      const tipW = tooltip.offsetWidth;
+      const canvasRect = canvas.getBoundingClientRect();
+      tooltip.style.left = (canvasRect.left + cx + CELL / 2 - tipW / 2) + 'px';
+      tooltip.style.top  = (canvasRect.top  + cy - tooltip.offsetHeight - 8) + 'px';
+    });
+
+    canvas.addEventListener('mouseleave', function () {
+      tooltip.style.display = 'none';
+    });
+  }
+
+  function init() {
+    const wrap = document.getElementById('contrib-wrap');
+    if (!wrap) return;
+
+    const weeks = calcWeeks(wrap.clientWidth);
+    render(weeks);
+    setupTooltip();
+
+    /* Re-render on container resize */
+    if (typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(function (entries) {
+        const w = entries[0].contentRect.width;
+        render(calcWeeks(w));
+      }).observe(wrap);
+    }
+  }
+
+  /* Re-render on dark/light toggle */
+  new MutationObserver(function (muts) {
+    muts.forEach(function (m) {
+      if (m.attributeName === 'data-mode') {
+        const wrap = document.getElementById('contrib-wrap');
+        if (wrap) render(calcWeeks(wrap.clientWidth));
+      }
+    });
+  }).observe(document.documentElement, { attributes: true });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>

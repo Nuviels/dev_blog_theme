@@ -25,13 +25,14 @@ search {
   }
 
   @include bp.xl {
-    margin-right: 4rem;
+    /* Align left edge with panel-wrapper (col-xl-3) border */
+    max-width: none;
+    width: calc(25% - 0.5rem);
+    margin-right: 0;
   }
 
   @include bp.xxxl {
-    margin-right: calc(
-      v.$main-content-max-width / 4 - v.$search-max-width - 0.75rem
-    );
+    margin-right: 0;
   }
 }
 

@@ -1,0 +1,100 @@
+@use '../abstracts/placeholders';
+
+/* Theme accent — terracotta #d2603a; chart accent — muted sienna for bar charts */
+:root {
+  --theme-accent:  #d2603a;
+  --chart-accent:  #a07050;
+  --contrib-empty: #f2ece8;
+  --contrib-l1:    #e8c4b4;
+  --contrib-l2:    #d4896a;
+  --contrib-l3:    #c05c32;
+  --contrib-l4:    #923f1f;
+}
+
+[data-mode='dark'] {
+  --theme-accent:  #d2603a;
+  --chart-accent:  #8a6045;
+  --contrib-empty: #2a1e18;
+  --contrib-l1:    #5c2b18;
+  --contrib-l2:    #8a3d22;
+  --contrib-l3:    #c05c32;
+  --contrib-l4:    #e8916e;
+}
+
+#contribution-graph {
+  @extend %panel-border;
+
+  padding-left: 1rem;
+  margin-top: 3rem;
+
+  .contrib-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .contrib-total {
+    font-size: 0.75rem;
+    color: var(--text-muted-color);
+  }
+
+  .contrib-graph-wrap {
+    position: relative;
+    overflow: visible;
+  }
+
+  canvas.contrib-canvas {
+    display: block;
+    cursor: default;
+  }
+
+  .contrib-legend {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 0.4rem;
+    font-size: 0.7rem;
+    color: var(--text-muted-color);
+
+    span.swatch {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
+    .legend-label {
+      margin-right: 2px;
+    }
+
+    .legend-label-right {
+      margin-left: 2px;
+    }
+  }
+
+  .contrib-tooltip {
+    display: none;
+    position: fixed;
+    background: var(--heading-color);
+    color: var(--main-bg);
+    font-size: 0.72rem;
+    padding: 4px 9px;
+    border-radius: 5px;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 4px solid var(--heading-color);
+    }
+  }
+}
