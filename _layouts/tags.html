@@ -1,0 +1,43 @@
+---
+layout: page
+# All the Tags of posts.
+---
+
+<div id="tags" class="d-flex flex-wrap mx-xl-2">
+  {% assign current_post_lang = page.post_lang | default: nil %}
+  {% assign tags = '' | split: '' %}
+  {% for t in site.tags %}
+    {% assign posts_of_tag = t[1] %}
+    {% if current_post_lang %}
+      {% assign posts_of_tag = posts_of_tag | where: 'post_lang', current_post_lang %}
+    {% endif %}
+    {% if site.env == 'development' %}
+      {% assign posts_of_tag = posts_of_tag | where_exp: 'item', 'item.hidden != true' %}
+    {% else %}
+      {% assign posts_of_tag = posts_of_tag | where_exp: 'item', 'item.hidden != true and item.local_only != true' %}
+    {% endif %}
+    {% if posts_of_tag.size > 0 %}
+      {% assign tags = tags | push: t[0] %}
+    {% endif %}
+  {% endfor %}
+
+  {% assign sorted_tags = tags | sort_natural %}
+
+  {% for t in sorted_tags %}
+    {% assign posts_of_tag = site.tags[t] %}
+    {% if current_post_lang %}
+      {% assign posts_of_tag = posts_of_tag | where: 'post_lang', current_post_lang %}
+    {% endif %}
+    {% if site.env == 'development' %}
+      {% assign posts_of_tag = posts_of_tag | where_exp: 'item', 'item.hidden != true' %}
+    {% else %}
+      {% assign posts_of_tag = posts_of_tag | where_exp: 'item', 'item.hidden != true and item.local_only != true' %}
+    {% endif %}
+    <div>
+      <span class="tag">
+        {{ t -}}
+        <span class="text-muted">{{ posts_of_tag.size }}</span>
+      </span>
+    </div>
+  {% endfor %}
+</div>

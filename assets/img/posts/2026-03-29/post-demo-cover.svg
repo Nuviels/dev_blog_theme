@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Blog Post Demo Cover</title>
+  <desc id="desc">Sample cover image for a Chirpy blog post with image and attachment examples.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f7efe5"/>
+      <stop offset="100%" stop-color="#d6e8f2"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="72" y="72" width="1056" height="486" rx="28" fill="#fffaf4" stroke="#1f2937" stroke-width="4"/>
+  <rect x="112" y="124" width="420" height="250" rx="18" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/>
+  <path d="M170 318l72-90 68 54 62-78 102 114H170z" fill="#2563eb" opacity="0.92"/>
+  <circle cx="430" cy="192" r="28" fill="#f59e0b"/>
+  <rect x="592" y="138" width="420" height="64" rx="12" fill="#1f2937"/>
+  <rect x="592" y="228" width="476" height="22" rx="11" fill="#94a3b8"/>
+  <rect x="592" y="268" width="450" height="22" rx="11" fill="#94a3b8"/>
+  <rect x="592" y="308" width="356" height="22" rx="11" fill="#94a3b8"/>
+  <rect x="592" y="376" width="220" height="76" rx="18" fill="#0f766e"/>
+  <rect x="838" y="376" width="230" height="76" rx="18" fill="#b45309"/>
+  <text x="592" y="181" font-family="Helvetica, Arial, sans-serif" font-size="38" font-weight="700" fill="#ffffff">Image + Attachment Demo</text>
+  <text x="618" y="424" font-family="Helvetica, Arial, sans-serif" font-size="28" font-weight="700" fill="#ffffff">IMG</text>
+  <text x="898" y="424" font-family="Helvetica, Arial, sans-serif" font-size="28" font-weight="700" fill="#ffffff">FILE</text>
+  <text x="112" y="520" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#334155">Use this under /assets/img and link files from /assets/files</text>
+</svg>

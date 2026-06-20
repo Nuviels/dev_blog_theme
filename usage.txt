@@ -1,0 +1,100 @@
+Chirpy 운영 가이드 (MacBook ARM + en/kr 분리)
+
+===
+(이동 가이드)
+	(move_md_src.sh)
+1 - 이동하고 싶은 md파일을 지정
+2 - md파일안에 링킹된 이미지와 파일들의 주소 수집하고 img,file파일에 각각 복사
+3 - md파일, img, file폴더를 tar gzip압축해서 tar파일로 만듦
+4 - scp로 지정한 주소,폴더로 복사해서 전달
+5 - move_md_dec.sh에서 진행
+
+(move_md_dec.sh)
+1 - tar압축해제
+2 - md파일 -> posts / img, file폴더에 잇는 파일들을 옮김
+3 - 압축 파일 정리
+
+===
+
+  bash tools/move_md_src.sh \
+    -m _posts/kr/2026-03-29-local-only-minimal-template.md \
+    -r nuviel@100.72.124.104:/tmp/ \
+    -o /tmp/post-pack.tar.gz
+
+  받는 쪽에서는 tar 파일을 받은 뒤 저장소 루트에서 이렇게 실행하면 됩니다.
+
+  bash tools/move_md_dec.sh -a /tmp/post-pack.tar.gz
+
+===
+
+
+0) 목적
+- URL 구조를 언어별로 분리:
+  /en/ ... 영어 글만
+  /kr/ ... 한국어 글만
+- 루트 / 는 /kr/ 로 리다이렉트
+
+1) 한 번만 하는 환경 준비
+- 터미널이 arm64인지 확인:
+  arch
+- rbenv 사용 (Ruby 3.3.x 권장)
+- 프로젝트 진입 후:
+  bundle config set --local path vendor/bundle
+  bundle install
+- 프론트엔드 빌드:
+  npm install
+  npm run build
+
+2) 현재 프로젝트에 적용된 라우팅 규칙
+- 홈:
+  /en/ -> en 홈
+  /kr/ -> kr 홈
+  /    -> /kr/ 리다이렉트
+- 포스트 기본 permalink:
+  en 글: /en/posts/:title/
+  kr 글: /kr/posts/:title/
+
+3) 글 작성 규칙 (중요)
+- 영어 글은 `_posts/en/` 아래에 작성
+  예: _posts/en/2026-03-17-my-en-post.md
+- 한국어 글은 `_posts/kr/` 아래에 작성
+  예: _posts/kr/2026-03-17-my-kr-post.md
+- 기존처럼 `_posts/` 루트에 작성하면 기본적으로 kr로 처리됨
+
+4) front matter 권장 예시
+- EN:
+  ---
+  title: My English Post
+  date: 2026-03-17 10:00:00 +0900
+  categories: [Blog]
+  tags: [jekyll, chirpy]
+  ---
+
+- KR:
+  ---
+  title: 내 한국어 글
+  date: 2026-03-17 10:00:00 +0900
+  categories: [블로그]
+  tags: [jekyll, chirpy]
+  ---
+
+5) 로컬 실행
+- 개발 서버:
+  bundle exec jekyll s
+- 접속:
+  http://127.0.0.1:4000/kr/
+  http://127.0.0.1:4000/en/
+
+6) 도메인 연결 시
+- 단일 도메인 경로 분리 권장:
+  https://yourdomain.com/en/
+  https://yourdomain.com/kr/
+- _config.yml 필수:
+  url: "https://yourdomain.com"
+  baseurl: ""
+
+7) 변경 후 필수 재빌드
+- JS 에셋 에러(theme.min.js/home.min.js) 방지:
+  npm run build
+- Ruby gem 변경 반영:
+  bundle install

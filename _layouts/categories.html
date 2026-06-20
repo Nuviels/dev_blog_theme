@@ -1,0 +1,285 @@
+---
+layout: page
+# All the Categories of posts
+---
+
+{% include lang.html %}
+
+{% assign current_post_lang = page.post_lang | default: 'kr' %}
+{% assign category_tree = site.category_tree_by_lang[current_post_lang] | default: '' %}
+
+<div id="categories" class="px-xl-1">
+  {% if category_tree.size > 0 %}
+    <div class="category-panel" id="category-tree-view">
+      <div class="d-flex justify-content-between align-items-center mb-3 category-panel-head">
+        <h2 class="h5 mb-0">Category Tree</h2>
+        <div class="d-flex gap-2">
+          <button type="button" id="expand-all-tree" class="btn btn-sm btn-outline-secondary">Expand</button>
+          <button type="button" id="collapse-all-tree" class="btn btn-sm btn-outline-secondary">Collapse</button>
+        </div>
+      </div>
+      <div class="category-scroll-box category-tree-box">
+        <ul class="list-unstyled mb-0">
+          {% for node in category_tree %}
+            {% include category-tree-item.html node=node %}
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="category-panel" id="posts-by-category-view" style="display: none;">
+      <div class="d-flex justify-content-between align-items-center mb-3 category-panel-head">
+        <div>
+          <h2 class="h5 mb-0">Posts By Category</h2>
+          <small class="text-muted" id="active-category-label"></small>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" id="collapse-all-posts" class="btn btn-sm btn-outline-secondary">Collapse</button>
+          <button type="button" id="expand-all-posts" class="btn btn-sm btn-outline-secondary">Expand</button>
+          <button type="button" id="close-posts-by-category" class="btn btn-sm btn-outline-secondary">
+            Back to Tree
+          </button>
+        </div>
+      </div>
+      <div class="category-scroll-box category-posts-box pe-1">
+        {% for node in category_tree %}
+          {% include category-post-sections.html node=node %}
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div class="category-panel text-center py-5">
+      <p class="text-muted mb-0">No categories yet.</p>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  #categories .category-panel {
+    border: 1px solid var(--main-border-color);
+    border-radius: 0.9rem;
+    background: var(--card-bg);
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  #categories .category-panel-head {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--card-bg);
+    padding-bottom: 0.25rem;
+  }
+
+  #categories .category-scroll-box {
+    max-height: 68vh;
+    overflow-y: auto;
+    border: 1px solid var(--main-border-color);
+    border-radius: 0.75rem;
+    background: var(--main-bg);
+    padding: 0.65rem;
+  }
+
+  #categories .category-tree-entry {
+    border: 1px solid var(--main-border-color);
+    background: var(--card-bg);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  #categories .category-tree-entry:hover {
+    border-color: var(--link-color);
+    background: rgba(80, 140, 255, 0.08);
+  }
+
+  #categories .category-tree-entry.active {
+    border-color: var(--link-color);
+    background: rgba(80, 140, 255, 0.14);
+  }
+
+  #categories .category-toggle-icon {
+    border: none;
+    background: transparent;
+    color: var(--text-muted-color);
+    font-size: 0.95rem;
+    line-height: 1;
+    padding: 0 0.15rem;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+
+  #categories .category-toggle-icon i {
+    transition: transform 0.2s ease;
+  }
+
+  #categories .category-toggle-icon[aria-expanded='false'] i {
+    transform: rotate(-90deg);
+  }
+
+  #categories .category-toggle-icon:hover {
+    color: var(--link-color);
+  }
+
+  #categories .category-count-badge {
+    background: linear-gradient(135deg, #ffe9dd, #f6d9ff);
+    color: #6b4f42;
+    border: 1px solid rgba(160, 120, 145, 0.18);
+    border-radius: 999px;
+    padding: 0.35rem 0.55rem;
+    font-weight: 700;
+  }
+
+  #categories .category-post-header {
+    border-bottom: 1px solid var(--main-border-color);
+    background: linear-gradient(90deg, rgba(255, 235, 224, 0.45), rgba(244, 232, 255, 0.45));
+  }
+
+  #categories .category-post-section .list-group-item {
+    border-color: var(--main-border-color);
+  }
+
+  #categories .category-post-section .list-group-item:hover {
+    background: rgba(120, 130, 150, 0.08);
+  }
+
+  #categories .category-node-icon {
+    color: #d78f6f;
+    font-size: 0.85rem;
+  }
+
+  #categories .category-section-icon {
+    color: #c5856b;
+  }
+
+  #categories .category-post-icon {
+    color: #de8da4;
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 991px) {
+    #categories .category-scroll-box {
+      max-height: 56vh;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const sections = Array.from(document.querySelectorAll('.category-post-section'));
+    const triggers = Array.from(document.querySelectorAll('.category-filter-trigger'));
+    const treeToggleButtons = Array.from(document.querySelectorAll('.category-node-toggle'));
+    const postToggleButtons = Array.from(document.querySelectorAll('.category-post-toggle'));
+    const treeView = document.getElementById('category-tree-view');
+    const postsView = document.getElementById('posts-by-category-view');
+    const closeBtn = document.getElementById('close-posts-by-category');
+    const expandAllTreeBtn = document.getElementById('expand-all-tree');
+    const collapseAllTreeBtn = document.getElementById('collapse-all-tree');
+    const expandAllPostsBtn = document.getElementById('expand-all-posts');
+    const collapseAllPostsBtn = document.getElementById('collapse-all-posts');
+    const activeCategoryLabel = document.getElementById('active-category-label');
+    const treeEntries = Array.from(document.querySelectorAll('.category-tree-entry'));
+
+    function showOnly(targetId, label) {
+      if (treeView) treeView.style.display = 'none';
+      if (postsView) postsView.style.display = '';
+      if (activeCategoryLabel) activeCategoryLabel.textContent = label || '';
+      sections.forEach((section) => {
+        section.style.display = section.id === targetId ? '' : 'none';
+      });
+    }
+
+    function setActiveTreeEntryByTarget(targetId) {
+      treeEntries.forEach((entry) => entry.classList.remove('active'));
+      const trigger = triggers.find((btn) => btn.getAttribute('data-target') === targetId);
+      if (!trigger) return;
+      const entry = trigger.closest('.category-tree-entry');
+      if (entry) entry.classList.add('active');
+    }
+
+    function showTreeView() {
+      if (postsView) postsView.style.display = 'none';
+      if (treeView) treeView.style.display = '';
+      if (activeCategoryLabel) activeCategoryLabel.textContent = '';
+      sections.forEach((section) => {
+        section.style.display = 'none';
+      });
+      treeEntries.forEach((entry) => entry.classList.remove('active'));
+    }
+
+    function setToggleState(button, expanded) {
+      button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    }
+
+    function toggleTargetDisplay(targetId, button) {
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      const visible = target.style.display !== 'none';
+      target.style.display = visible ? 'none' : '';
+      setToggleState(button, !visible);
+    }
+
+    function setAllTree(expand) {
+      treeToggleButtons.forEach((btn) => {
+        const targetId = btn.getAttribute('data-target');
+        const target = document.getElementById(targetId);
+        if (!target) return;
+        target.style.display = expand ? '' : 'none';
+        setToggleState(btn, expand);
+      });
+    }
+
+    function setAllPostLists(expand) {
+      postToggleButtons.forEach((btn) => {
+        const targetId = btn.getAttribute('data-target');
+        const target = document.getElementById(targetId);
+        if (!target) return;
+        target.style.display = expand ? '' : 'none';
+        setToggleState(btn, expand);
+      });
+    }
+
+    showTreeView();
+
+    triggers.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        const label = (btn.textContent || '').trim();
+        if (!targetId) return;
+        showOnly(targetId, label);
+        setActiveTreeEntryByTarget(targetId);
+      });
+    });
+
+    treeToggleButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        if (!targetId) return;
+        toggleTargetDisplay(targetId, btn);
+      });
+    });
+
+    postToggleButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        if (!targetId) return;
+        toggleTargetDisplay(targetId, btn);
+      });
+    });
+
+    if (expandAllTreeBtn) {
+      expandAllTreeBtn.addEventListener('click', () => setAllTree(true));
+    }
+    if (collapseAllTreeBtn) {
+      collapseAllTreeBtn.addEventListener('click', () => setAllTree(false));
+    }
+    if (expandAllPostsBtn) {
+      expandAllPostsBtn.addEventListener('click', () => setAllPostLists(true));
+    }
+    if (collapseAllPostsBtn) {
+      collapseAllPostsBtn.addEventListener('click', () => setAllPostLists(false));
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', showTreeView);
+    }
+  })();
+</script>

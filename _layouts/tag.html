@@ -1,0 +1,32 @@
+---
+layout: page
+# The layout for Tag page
+---
+
+{% include lang.html %}
+{% assign posts_pool = page.posts %}
+{% if page.post_lang %}
+  {% assign posts_pool = page.posts | where: 'post_lang', page.post_lang %}
+{% endif %}
+{% if site.env == 'development' %}
+  {% assign posts_pool = posts_pool | where_exp: 'item', 'item.hidden != true' %}
+{% else %}
+  {% assign posts_pool = posts_pool | where_exp: 'item', 'item.hidden != true and item.local_only != true' %}
+{% endif %}
+
+<div id="page-tag">
+  <h1 class="ps-lg-2">
+    <i class="fa fa-tag fa-fw text-muted"></i>
+    {{ page.title }}
+    <span class="lead text-muted ps-2">{{ posts_pool | size }}</span>
+  </h1>
+  <ul class="content ps-0">
+    {% for post in posts_pool %}
+      <li class="d-flex justify-content-between px-md-3">
+        <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        <span class="dash flex-grow-1"></span>
+        {% include datetime.html date=post.date class='text-muted small text-nowrap' lang=lang %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>

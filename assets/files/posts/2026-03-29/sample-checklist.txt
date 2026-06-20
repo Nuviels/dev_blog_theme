@@ -1,0 +1,7 @@
+Chirpy attachment sample
+========================
+
+1. Put images under /assets/img/...
+2. Put downloadable files under /assets/files/...
+3. Link the file in Markdown:
+   [download](/assets/files/posts/2026-03-29/sample-checklist.txt)

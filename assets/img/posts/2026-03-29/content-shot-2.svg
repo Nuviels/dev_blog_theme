@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" viewBox="0 0 900 560" role="img" aria-labelledby="title desc">
+  <title id="title">Content Shot Two</title>
+  <desc id="desc">Second inline image example for a blog post.</desc>
+  <rect width="900" height="560" fill="#fff7ed"/>
+  <rect x="36" y="36" width="828" height="488" rx="26" fill="#ffffff" stroke="#7c2d12" stroke-width="4"/>
+  <rect x="84" y="92" width="732" height="70" rx="16" fill="#7c2d12"/>
+  <rect x="84" y="206" width="520" height="22" rx="11" fill="#cbd5e1"/>
+  <rect x="84" y="246" width="630" height="22" rx="11" fill="#cbd5e1"/>
+  <rect x="84" y="286" width="460" height="22" rx="11" fill="#cbd5e1"/>
+  <rect x="84" y="350" width="188" height="108" rx="18" fill="#fdba74"/>
+  <rect x="300" y="350" width="188" height="108" rx="18" fill="#fed7aa"/>
+  <rect x="516" y="350" width="252" height="108" rx="18" fill="#ffedd5"/>
+  <text x="114" y="136" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="700" fill="#ffffff">Secondary Content Image</text>
+</svg>

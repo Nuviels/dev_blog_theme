@@ -1,0 +1,35 @@
+<li class="mb-2" id="cat-{{ include.node.slug }}">
+  <div class="d-flex align-items-center justify-content-between rounded px-3 py-2 gap-2 category-tree-entry">
+    <div class="d-flex align-items-center gap-2">
+      {% if include.node.children and include.node.children.size > 0 %}
+        <button
+          type="button"
+          class="category-node-toggle category-toggle-icon"
+          data-target="tree-children-{{ include.node.slug }}"
+          aria-expanded="true"
+          aria-label="Toggle category branch"
+        >
+          <i class="fas fa-chevron-down"></i>
+        </button>
+      {% endif %}
+      <button
+        type="button"
+        class="btn btn-link p-0 text-decoration-none fw-medium category-filter-trigger text-start"
+        data-target="cat-section-{{ include.node.slug }}"
+        data-node-slug="{{ include.node.slug }}"
+      >
+        <i class="fas fa-paw category-node-icon me-1"></i>
+        {{ include.node.name }}
+      </button>
+    </div>
+    <span class="badge category-count-badge">{{ include.node.count }}</span>
+  </div>
+
+  {% if include.node.children and include.node.children.size > 0 %}
+    <ul class="list-unstyled ms-4 mt-2" id="tree-children-{{ include.node.slug }}">
+      {% for child in include.node.children %}
+        {% include category-tree-item.html node=child %}
+      {% endfor %}
+    </ul>
+  {% endif %}
+</li>

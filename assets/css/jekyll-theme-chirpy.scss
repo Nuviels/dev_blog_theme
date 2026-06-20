@@ -1,0 +1,140 @@
+---
+---
+
+/* prettier-ignore */
+@use 'main
+{%- if jekyll.environment == 'production' -%}
+  .bundle
+{%- endif -%}
+';
+
+/* append your custom style below */
+
+/* Cute theme skin inspired by base.png (soft cream + charcoal + blush) */
+
+html:not([data-mode]),
+html[data-mode='light'] {
+  --main-bg: #f7f3ed;
+  --card-bg: #fffdfa;
+  --main-border-color: #e8dfd3;
+  --text-color: #4a4540;
+  --heading-color: #2f2c2a;
+  --text-muted-color: #8a8178;
+  --label-color: #6d655e;
+  --link-color: #6f5448;
+  --link-underline-color: #d6c9bb;
+  --button-bg: #fffaf3;
+  --btn-border-color: #ddcfbf;
+  --sidebar-bg: #efe6db;
+  --sidebar-border-color: #e0d4c5;
+  --sidebar-muted-color: #665f58;
+  --sidebar-active-color: #2f2c2a;
+  --sidebar-hover-bg: #f6eee5;
+  --topbar-bg: rgb(255 250 244 / 82%);
+  --topbar-text-color: #5b554f;
+  --search-border-color: #e4d9cb;
+  --input-focus-border-color: #c8b7a4;
+  --post-list-text-color: #6a6259;
+  --btn-patinator-text-color: #6f6358;
+  --tag-border: #d8caba;
+  --tag-hover: #eee3d7;
+  --categories-border: rgb(111 84 72 / 18%);
+  --categories-hover-bg: #efe2d5;
+  --timeline-node-bg: #cabfb0;
+  --timeline-color: rgb(80 63 54 / 12%);
+  --card-shadow: rgb(114 92 80 / 8%) 0 6px 18px 0, rgb(196 180 166 / 35%) 0 0 0 1px;
+}
+
+html[data-mode='light'] body,
+html:not([data-mode]) body {
+  background:
+    radial-gradient(1200px 500px at 85% -120px, rgb(242 231 219 / 60%), transparent 60%),
+    radial-gradient(700px 420px at -20% 20%, rgb(249 236 226 / 40%), transparent 60%),
+    var(--main-bg);
+  color: var(--text-color);
+  font-family: 'Nunito', 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
+}
+
+#sidebar,
+#topbar-wrapper,
+.card,
+.category-panel,
+.post-content > blockquote,
+.btn,
+input.form-control,
+button,
+.post-tag {
+  border-radius: 14px;
+}
+
+.btn,
+.post-tag,
+.badge {
+  font-weight: 700;
+}
+
+.btn-outline-secondary {
+  border-color: var(--btn-border-color);
+  color: var(--label-color);
+  background: var(--button-bg);
+}
+
+.btn-outline-secondary:hover {
+  background: #f3e8dc;
+  border-color: #c8b7a4;
+  color: #3e3935;
+}
+
+.card-wrapper.card {
+  border: 1px solid var(--main-border-color);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.18s ease, box-shadow 0.2s ease;
+}
+
+.card-wrapper.card:hover {
+  transform: translateY(-2px);
+}
+
+#sidebar .nav-item .nav-link {
+  border-radius: 12px;
+}
+
+#sidebar .site-title {
+  letter-spacing: 0.2px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: 0.1px;
+}
+
+#sidebar .profile-wrapper {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--main-border-color);
+  border-radius: 16px;
+  padding: 1rem 0.75rem 0.85rem;
+  background: linear-gradient(180deg, rgb(255 252 247 / 95%), rgb(250 244 236 / 92%));
+}
+
+#sidebar .profile-wrapper > *:not(.cute-profile-bg) {
+  position: relative;
+  z-index: 2;
+}
+
+#sidebar .cute-profile-bg {
+  position: absolute;
+  inset: -28px -26px auto auto;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.17;
+  transform: rotate(8deg);
+  filter: saturate(0.7) contrast(0.95);
+  z-index: 1;
+  pointer-events: none;
+}
